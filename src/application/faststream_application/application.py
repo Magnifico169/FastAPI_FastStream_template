@@ -3,18 +3,18 @@ import aio_pika
 from faststream import FastStream
 from faststream.specification import AsyncAPI
 
-from models.rabbit.rabbit import (
-    rabbit_broker,
+from core.models.rabbit.rabbit import (
     create_order_exch_init,
     create_order_queue_init,
     create_user_exch_init,
     create_user_queue_init,
     delete_order_exch_init,
     delete_order_queue_init,
-    delete_user_exch_init,
-    delete_user_queue_init,
+    get_order_into_exch_init,
+    get_order_queue_init,
     get_orders_into_exch_init,
     get_orders_queue_init,
+    rabbit_broker,
     update_order_exch_init,
     update_order_queue_init,
 )
@@ -53,8 +53,8 @@ async def initialize_app() -> None:
     get_orders_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=get_orders_queue_init)
     await get_orders_queue.bind(exchange=get_orders_into_exchange)
 
-    delete_user_exchange: aio_pika.RobustExchange = await rabbit_broker.declare_exchange(
-        exchange=delete_user_exch_init,
+    get_order_into_exchange: aio_pika.RobustExchange = await rabbit_broker.declare_exchange(
+        exchange=get_order_into_exch_init,
     )
-    delete_user_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=delete_user_queue_init)
-    await delete_user_queue.bind(exchange=delete_user_exchange)
+    get_order_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=get_order_queue_init)
+    await get_order_queue.bind(exchange=get_order_into_exchange)

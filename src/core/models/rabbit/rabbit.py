@@ -10,12 +10,8 @@ rabbitmq_settings = get_rabbitmq_settings()
 rabbitmq_uri = rabbitmq_settings.get_rabbitmq_uri()
 
 
-
 create_user_exch_init = RabbitExchange("create_user_exchange", type=ExchangeType.DIRECT, durable=True)
 create_user_queue_init = RabbitQueue("create_user_queue", durable=True)
-
-delete_user_exch_init = RabbitExchange("delete_user_exchange", type=ExchangeType.DIRECT, durable=True)
-delete_user_queue_init = RabbitQueue("delete_user_queue", durable=True)
 
 create_order_exch_init = RabbitExchange("create_order_exchange", type=ExchangeType.DIRECT, durable=True)
 create_order_queue_init = RabbitQueue("create_order_queue", durable=True)
