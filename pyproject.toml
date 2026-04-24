@@ -1,0 +1,14 @@
+[project]
+name = "faststreamtemplate"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fast-depends>=3.0.8",
+    "fastapi>=0.136.1",
+    "faststream>=0.6.7",
+    "pydantic>=2.13.3",
+    "pydantic-settings>=2.14.0",
+    "uvicorn>=0.46.0",
+]
