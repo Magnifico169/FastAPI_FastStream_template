@@ -11,10 +11,10 @@ class RabbitMQSettings(BaseSettings):
         default="amqp",
         description="RabbitMQ scheme (e.g., amqp, amqps)",
     )
-    RABBITMQ_HOST: str = Field(default="5672", description="RabbitMQ host")
-    RABBITMQ_PORT: int = Field(default="rabbitmq", description="RabbitMQ port")
-    RABBITMQ_USER: str = Field(default="rabbit", description="RabbitMQ user")
-    RABBITMQ_PASSWORD: str = Field(..., description="RabbitMQ password")
+    RABBITMQ_HOST: str = Field(default="localhost", description="RabbitMQ host")
+    RABBITMQ_PORT: int = Field(default=5672, description="RabbitMQ port")
+    RABBITMQ_USER: str = Field(default="guest", description="RabbitMQ user")
+    RABBITMQ_PASSWORD: str = Field(default="guest", description="RabbitMQ password")
     RABBITMQ_VHOST: str = Field(default="/", description="RabbitMQ vhost")
 
     def get_rabbitmq_uri(self) -> str:

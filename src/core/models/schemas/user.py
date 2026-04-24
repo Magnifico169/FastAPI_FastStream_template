@@ -1,12 +1,8 @@
-from enum import StrEnum
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-
-class UserStatus(StrEnum):
-    ACTIVE = "ACTIVE"
-    BLOCKED = "BLOCKED"
+from constants.user_status import UserStatus
 
 
 class UserInfoSchema(BaseModel):

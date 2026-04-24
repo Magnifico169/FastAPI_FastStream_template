@@ -3,7 +3,7 @@ import aio_pika
 from faststream import FastStream
 from faststream.specification import AsyncAPI
 
-from core.models.rabbit.rabbit import (
+from infrastructure.rabbit.rabbit import (
     create_order_exch_init,
     create_order_queue_init,
     create_user_exch_init,

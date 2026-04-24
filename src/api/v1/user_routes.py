@@ -1,12 +1,12 @@
 from fastapi import APIRouter, status
 
-from core.models.rabbit.rabbit import (
+from infrastructure.rabbit import (
     create_user_exch_init,
     create_user_queue_init,
     rabbit_broker,
 )
-from schemas.response import MessageStatusResponse
-from schemas.user import UserInfoSchema
+from models.schemas.response import MessageStatusResponse
+from models.schemas import UserInfoSchema
 
 user_router = APIRouter()
 

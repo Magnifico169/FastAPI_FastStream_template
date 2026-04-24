@@ -4,7 +4,7 @@ import sys
 from faststream.rabbit.fastapi import RabbitRouter
 from faststream.rabbit import RabbitQueue, RabbitExchange, ExchangeType
 
-from core.settings.rabbitmq_settings import get_rabbitmq_settings
+from models.settings.rabbitmq_settings import get_rabbitmq_settings
 
 rabbitmq_settings = get_rabbitmq_settings()
 rabbitmq_uri = rabbitmq_settings.get_rabbitmq_uri()

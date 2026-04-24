@@ -1,15 +1,8 @@
-from enum import StrEnum
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-
-class OrderStatus(StrEnum):
-    PENDING = "PENDING"
-    ACTIVE = "ACTIVE"
-    COMPLETED = "COMPLETED"
-    CANCELED = "CANCELED"
-    FAILED = "FAILED"
+from constants.order_status import OrderStatus
 
 
 class OrderStatusRequestSchema(BaseModel):

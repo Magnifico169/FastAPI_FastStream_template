@@ -1,11 +1,13 @@
 import uvicorn
-import asyncio
-from application import app
 
 
-async def main():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+def main() -> None:
+    uvicorn.run(
+        "application.fastapi_application.application:app",
+        host="0.0.0.0",
+        port=8000,
+    )
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

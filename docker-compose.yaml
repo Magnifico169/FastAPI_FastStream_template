@@ -1,30 +1,59 @@
 services:
-  backend:
-    container_name: backend
-    build:
-      context: ./src
-      dockerfile: src/Dockerfile-backend
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    volumes:
-      - ./backend:/app
-    depends_on:
-      - postgres
-
   postgres:
     image: postgres:18
-    container_name: postgres
     restart: unless-stopped
-    env_file:
-      - .env
-    volumes:
-      - pg-data:/var/lib/postgresql/
+    env_file: .env
     ports:
       - "5433:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/
+
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    hostname: rabbitmq
+    env_file: .env
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-api
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-worker
+    env_file: .env
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   pg-data:
-    name: grandline-postgres-data
+    name: postgres-data
+  rabbitmq-data:
+    name: rabbit-data

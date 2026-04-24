@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, status
 
-from core.models.rabbit.rabbit import (
+from infrastructure.rabbit import (
     create_order_exch_init,
     create_order_queue_init,
     delete_order_exch_init,
@@ -16,8 +16,8 @@ from core.models.rabbit.rabbit import (
     update_order_exch_init,
     update_order_queue_init,
 )
-from schemas.order import OrderStatusRequestSchema, OrderStatusResponseSchema
-from schemas.response import MessageStatusResponse
+from models.schemas import OrderStatusRequestSchema, OrderStatusResponseSchema
+from models.schemas.response import MessageStatusResponse
 
 ALL_ORDERS_STATUS_ORDER_ID: Final[UUID] = UUID("00000000-0000-0000-0000-000000000000")
 

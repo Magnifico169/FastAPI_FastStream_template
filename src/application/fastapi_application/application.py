@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.v1.order_routes import order_router
 from api.v1.user_routes import user_router
-from core.models.rabbit.rabbit import rabbit_broker, rabbit_router
+from infrastructure.rabbit.rabbit import rabbit_broker, rabbit_router
 
 
 @asynccontextmanager
