@@ -1,0 +1,22 @@
+from uuid import UUID
+from datetime import datetime, UTC
+from sqlalchemy import Uuid, Column, DateTime
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import DeclarativeBase, MappedColumn
+
+
+class Base(AsyncAttrs, DeclarativeBase):
+    """Base declarative class for the ORM."""
+
+
+class BaseTable(Base):
+    """Abstract table with shared primary key and creation timestamp.
+
+    :ivar id: Surrogate primary key, UUID.
+    :ivar created_at: Row creation time, stored in UTC.
+    """
+
+    __abstract__ = True
+
+    id: MappedColumn[UUID] = Column(Uuid(), primary_key=True, nullable=False)
+    created_at = Column(DateTime(), default=datetime.now(UTC), nullable=False)
