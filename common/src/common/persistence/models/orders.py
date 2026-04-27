@@ -22,5 +22,5 @@ class Order(BaseTable):
     products: MappedColumn[object] = Column(JSON(), nullable=False)
     user_id: MappedColumn[UUID] = Column(Uuid(), nullable=False)
     address: MappedColumn[str] = Column(String(), nullable=False)
-    delivery_date: MappedColumn[datetime] = Column(DateTime(), nullable=False)
+    delivery_date: MappedColumn[datetime] = Column(DateTime(timezone=True), nullable=False)
     description: MappedColumn[str] = Column(String(), nullable=True)

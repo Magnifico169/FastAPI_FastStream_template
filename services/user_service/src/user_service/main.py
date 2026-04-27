@@ -55,6 +55,12 @@ app.include_router(order_router)
 app.include_router(rabbit_router)
 
 
+@app.get("/health")
+async def health() -> dict[str, str]:
+    """Liveness: used by container health check."""
+    return {"status": "ok"}
+
+
 async def run() -> None:
     """Run the FastAPI application."""
     config = uvicorn.Config(app, host="0.0.0.0", port=8000)

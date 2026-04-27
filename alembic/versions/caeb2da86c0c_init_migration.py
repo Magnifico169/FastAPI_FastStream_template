@@ -24,10 +24,10 @@ def upgrade() -> None:
     sa.Column('products', sa.JSON(), nullable=False),
     sa.Column('user_id', sa.Uuid(), nullable=False),
     sa.Column('address', sa.String(), nullable=False),
-    sa.Column('delivery_date', sa.DateTime(), nullable=False),
+    sa.Column('delivery_date', sa.DateTime(timezone=True), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
     sa.Column('id', sa.Uuid(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('products',
@@ -36,7 +36,7 @@ def upgrade() -> None:
     sa.Column('price', sa.Float(), nullable=False),
     sa.Column('description', sa.String(), nullable=False),
     sa.Column('id', sa.Uuid(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name', 'price', 'created_at', name='uq_products_name_price_created_at')
     )
@@ -45,7 +45,7 @@ def upgrade() -> None:
     sa.Column('delivery_address', sa.String(), nullable=False),
     sa.Column('status', sa.String(), nullable=False),
     sa.Column('id', sa.Uuid(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

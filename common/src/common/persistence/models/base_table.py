@@ -21,4 +21,4 @@ class BaseTable(Base):
     __abstract__ = True
 
     id: MappedColumn[UUID] = Column(Uuid(), primary_key=True, nullable=False)
-    created_at = Column(DateTime(), default=datetime.now(UTC), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.now(UTC), nullable=False)

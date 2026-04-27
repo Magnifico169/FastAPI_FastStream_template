@@ -1,7 +1,8 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
+import json
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from common.domain.product import Product
 
@@ -17,6 +18,8 @@ class Order(BaseModel):
     :ivar delivery_date: Expected or scheduled delivery time.
     :ivar description: Free-form notes, absent when the column is null.
     """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     id: UUID = Field(default_factory=uuid4, description="Primary key; generated for new rows when using defaults.")
     created_at: datetime = Field(
