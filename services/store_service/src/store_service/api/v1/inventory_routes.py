@@ -35,7 +35,7 @@ async def create_product(
 
 
 @inventory_router.delete(
-    "/product/{product_id}",
+    "/product",
     tags=["inventory"],
     response_model=MessageStatusResponse,
 )

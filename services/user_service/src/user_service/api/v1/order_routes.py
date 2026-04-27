@@ -19,17 +19,14 @@ from common.schemas import MessageStatusResponse, OrderStatusRequestSchema
 order_router = APIRouter()
 
 
-@order_router.get(
+@order_router.post(
     "/order_status",
     status_code=status.HTTP_202_ACCEPTED,
     tags=["order"],
 )
 async def get_order_status(message: OrderStatusRequestSchema) -> MessageStatusResponse:
     """
-    Get order status.
-
-    :param message:
-    :return:
+    Start async lookup of a single order (published to the worker queue).
     """
 
     await rabbit_broker.publish(
@@ -39,21 +36,17 @@ async def get_order_status(message: OrderStatusRequestSchema) -> MessageStatusRe
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
-        status=status.HTTP_202_ACCEPTED,
     )
 
 
-@order_router.get(
+@order_router.post(
     "/orders_status",
     status_code=status.HTTP_202_ACCEPTED,
     tags=["order"],
 )
 async def get_orders_status(message: OrderStatusRequestSchema) -> MessageStatusResponse:
     """
-    Get orders status.
-
-    :param message:
-    :return:
+    Start async lookup of orders for a user (published to the worker queue).
     """
 
     await rabbit_broker.publish(
@@ -63,7 +56,6 @@ async def get_orders_status(message: OrderStatusRequestSchema) -> MessageStatusR
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
-        status=status.HTTP_202_ACCEPTED,
     )
 
 
@@ -87,7 +79,6 @@ async def create_order(message: OrderStatusRequestSchema) -> MessageStatusRespon
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
-        status=status.HTTP_202_ACCEPTED,
     )
 
 
@@ -111,7 +102,6 @@ async def cancel_order(message: OrderStatusRequestSchema) -> MessageStatusRespon
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
-        status=status.HTTP_202_ACCEPTED,
     )
 
 
@@ -135,5 +125,4 @@ async def update_order(message: OrderStatusRequestSchema) -> MessageStatusRespon
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
-        status=status.HTTP_202_ACCEPTED,
     )

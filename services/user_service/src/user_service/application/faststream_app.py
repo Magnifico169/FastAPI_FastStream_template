@@ -1,6 +1,5 @@
 import aio_pika
 from faststream import FastStream
-from faststream.specification import AsyncAPI
 
 from common.messaging import (
     cancel_order_exch_init,

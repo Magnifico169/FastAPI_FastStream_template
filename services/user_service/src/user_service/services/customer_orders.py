@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import Depends
 
 from common.domain import Order
+from common.utils.pydantic_db import json_fields, model_dump_for_orm
 from user_service.repositories import (
     OrdersRepository,
     OrdersRepositoryDependence,
@@ -57,7 +58,12 @@ class UserService:
                 return None
             await self.products_repository.update(inventory_product[0], inventory_product)
 
-        return await self.order_repository.create(order)
+        row = model_dump_for_orm(
+            order,
+            exclude_unset=False,
+            json_fields=json_fields,
+        )
+        return await self.order_repository.create(row)
 
     async def edit_order(self, order: Order) -> Order | None:
         """
@@ -70,7 +76,12 @@ class UserService:
         if not existing_order:
             logger.warning("Order %s not found.", order.id)
             return None
-        return await self.order_repository.update(existing_order, order)
+        row = model_dump_for_orm(
+            order,
+            exclude_unset=True,
+            json_fields=json_fields,
+        )
+        return await self.order_repository.update(existing_order, row)
 
     async def cancel_order(self, order: Order) -> None:
         """

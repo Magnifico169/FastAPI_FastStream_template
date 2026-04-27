@@ -9,7 +9,7 @@ from uuid import UUID
 
 # Fields on the order row whose *values* are stored as JSON (nested UUID/datetime
 # must be stringified), while other columns keep native types for the DB driver.
-ORDER_NESTED_JSON_COLUMN_FIELDS: frozenset[str] = frozenset({"products"})
+json_fields: frozenset[str] = frozenset({"products"})
 
 
 def _nested_json_compatible(obj: Any) -> Any:
