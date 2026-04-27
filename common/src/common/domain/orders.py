@@ -7,7 +7,16 @@ from common.domain.product import Product
 
 
 class Order(BaseModel):
-    """Pydantic model aligned with the orders database table."""
+    """Pydantic model aligned with the orders database table.
+
+    :ivar id: Primary key; generated for new rows when using defaults.
+    :ivar created_at: UTC instant when the record was first stored.
+    :ivar products: Product instance from DB.
+    :ivar user_id: User who placed the order.
+    :ivar address: Destination address for delivery.
+    :ivar delivery_date: Expected or scheduled delivery time.
+    :ivar description: Free-form notes, absent when the column is null.
+    """
 
     id: UUID = Field(default_factory=uuid4, description="Primary key; generated for new rows when using defaults.")
     created_at: datetime = Field(

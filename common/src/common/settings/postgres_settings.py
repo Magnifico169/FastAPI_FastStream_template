@@ -5,14 +5,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class PostgresSettings(BaseSettings):
+    """Postgres settings"""
+
     model_config = SettingsConfigDict(extra="ignore")
 
-    POSTGRES_DBNAME: str = Field(default="postgres+asyncpg", description="Postgres database name")
+    POSTGRES_DBNAME: str = Field(default="postgres", description="Postgres database name")
     POSTGRES_HOST: str = Field(default="postgres", description="Postgres host")
     POSTGRES_PORT: int = Field(default=5432, description="Postgres port")
     POSTGRES_USER: str = Field(default="postgres", description="Postgres user")
     POSTGRES_PASSWORD: str = Field(..., description="Postgres password")
-    POSTGRES_DRIVER: str = Field(default="postgresql", description="Postgres driver")
+    POSTGRES_DRIVER: str = Field(default="postgresql+asyncpg", description="Postgres driver")
 
     POSTGRES_POOL_SIZE: int = Field(default=20, ge=1, le=100, description="Number of connections to maintain in pool")
     POSTGRES_MAX_OVERFLOW: int = Field(default=10, ge=0, description="Maximum overflow connections beyond pool_size")
@@ -28,6 +30,7 @@ class PostgresSettings(BaseSettings):
     )
 
     def get_postgres_uri(self) -> str:
+        """Get Postgres URI"""
         return str(
             PostgresDsn.build(
                 scheme=self.POSTGRES_DRIVER,
@@ -42,4 +45,5 @@ class PostgresSettings(BaseSettings):
 
 @lru_cache
 def get_postgres_settings() -> PostgresSettings:
+    """Get Postgres settings"""
     return PostgresSettings()  # type: ignore[call-arg]

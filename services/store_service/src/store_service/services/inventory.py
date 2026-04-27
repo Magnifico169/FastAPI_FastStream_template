@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fast_depends import Depends
+from fastapi import Depends
 
 from common.domain import Product
 from store_service.repositories import (
@@ -13,10 +13,26 @@ logger = logging.getLogger(__name__)
 
 
 class InventoryService:
+    """
+    Inventory Service class.
+    """
+
     def __init__(self, product_repository: ProductsRepository) -> None:
+        """
+        Initializes the Inventory_service service.
+
+        :param product_repository: Product repository
+        :return None
+        """
         self.product_repository = product_repository
 
     async def add_product_to_inventory(self, product: Product) -> Product:
+        """
+        Add product to inventory.
+
+        :param product:
+        :return:
+        """
         inventory_product = await self.product_repository.filter_by(
             **{
                 "name": product.name,
@@ -31,6 +47,12 @@ class InventoryService:
         return await self.product_repository.update(inventory_product[0], inventory_product)
 
     async def update_product_inventory(self, product: Product) -> Product:
+        """
+        Update product inventory.
+
+        :param product:
+        :return:
+        """
         inventory_product = await self.product_repository.filter_by(
             **{
                 "name": product.name,
@@ -44,6 +66,12 @@ class InventoryService:
         return await self.product_repository.update(product, inventory_product[0])
 
     async def remove_product_from_inventory(self, product: Product) -> None:
+        """
+        Remove product from inventory.
+
+        :param product:
+        :return:
+        """
         is_delete = await self.product_repository.delete(product.id)
         if not is_delete:
             logger.warning("Product %s not found.", product.name)
@@ -53,6 +81,7 @@ class InventoryService:
 def get_inventory_service(
     product_repository: ProductsRepositoryDependence,
 ) -> InventoryService:
+    """Get Inventory Service class."""
     return InventoryService(product_repository)
 
 

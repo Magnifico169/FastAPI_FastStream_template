@@ -11,7 +11,8 @@ services:
   rabbitmq:
     image: rabbitmq:4.1-management-alpine
     hostname: rabbitmq
-    env_file: .env
+    env_file:
+      .env
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     ports:
@@ -28,12 +29,10 @@ services:
     build:
       context: .
       dockerfile: services/user_service/Dockerfile
-    env_file: .env
+    env_file:
+      .env
     ports:
       - "8000:8000"
-    volumes:
-      - ./common:/app/common:ro
-      - ./services/user_service/src:/app/services/user_service/src:ro
     depends_on:
       postgres:
         condition: service_started
@@ -44,15 +43,14 @@ services:
   user-worker:
     build:
       context: .
-      dockerfile: services/user_service/Dockerfile.worker
+      dockerfile: services/user_service/Dockerfile-worker
     env_file: .env
-    volumes:
-      - ./common:/app/common:ro
-      - ./services/user_service/src:/app/services/user_service/src:ro
     depends_on:
       rabbitmq:
-        condition: service_healthy
-    restart: unless-stopped
+        condition:
+          service_healthy
+    restart:
+      unless-stopped
 
   store-api:
     build:
@@ -61,31 +59,33 @@ services:
     env_file: .env
     ports:
       - "8001:8001"
-    volumes:
-      - ./common:/app/common:ro
-      - ./services/store_service/src:/app/services/store_service/src:ro
     depends_on:
       postgres:
-        condition: service_started
+        condition:
+          service_started
       rabbitmq:
-        condition: service_healthy
-    restart: unless-stopped
+        condition:
+          service_healthy
+    restart:
+      unless-stopped
 
   store-worker:
     build:
       context: .
-      dockerfile: services/store_service/Dockerfile.worker
-    env_file: .env
-    volumes:
-      - ./common:/app/common:ro
-      - ./services/store_service/src:/app/services/store_service/src:ro
+      dockerfile: services/store_service/Dockerfile-worker
+    env_file:
+      .env
     depends_on:
       rabbitmq:
-        condition: service_healthy
-    restart: unless-stopped
+        condition:
+          service_healthy
+    restart:
+      unless-stopped
 
 volumes:
   pg-data:
-    name: postgres-data
+    name:
+      postgres-data
   rabbitmq-data:
-    name: rabbit-data
+    name:
+      rabbit-data

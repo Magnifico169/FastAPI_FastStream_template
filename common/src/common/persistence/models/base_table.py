@@ -11,7 +11,12 @@ class Base(AsyncAttrs, DeclarativeBase):
 
 
 class BaseTable(Base):
-    """Abstract table with shared primary key and creation timestamp."""
+    """
+    Abstract table with shared primary key and creation timestamp.
+
+    :ivar id: Unique primary key for the table.
+    :ivar created_at: UTC timestamp for the table.
+    """
 
     __abstract__ = True
 

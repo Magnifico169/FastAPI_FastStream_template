@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
 from typing import Annotated, ClassVar
 
-from fast_depends import Depends
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -13,10 +13,22 @@ from common.settings import get_postgres_settings
 
 
 class PostgresSessionFactory:
+    """
+    Factory class for creating PostgreSQL database sessions.
+
+    Provides class methods for session creation without instantiation.
+    Session factory is stored as a class variable (Singleton pattern).
+    """
+
     _session_factory: ClassVar[async_sessionmaker[AsyncSession] | None] = None
 
     @classmethod
-    def initialize(cls) -> None:
+    async def initialize(cls) -> None:
+        """
+        Initialize the global session factory with given settings.
+
+        :raises RuntimeError: if already initialized
+        """
         postgres_settings = get_postgres_settings()
         if cls._session_factory is not None:
             raise RuntimeError("Session factory already initialized")
@@ -44,6 +56,20 @@ class PostgresSessionFactory:
     @classmethod
     @asynccontextmanager
     async def get_session(cls) -> AsyncGenerator[AsyncSession, None]:
+        """
+        Create and return a database session.
+
+        Session lifecycle must be managed by the caller.
+        Use as context manager for automatic cleanup.
+
+        :returns: AsyncSession instance
+        :raises RuntimeError: if factory not initialized
+
+        Example::
+
+            async with PostgresSessionFactory.get_session() as session:
+                result = await session.execute(query)
+        """
         if cls._session_factory is None:
             raise RuntimeError("Session factory not initialized. Call initialize() first.")
 
@@ -55,12 +81,14 @@ class PostgresSessionFactory:
 
     @classmethod
     async def close(cls) -> None:
+        """
+        Close all database connections and clean up resources.
+
+        Should be called during application shutdown.
+        """
         if cls._session_factory is not None:
-            bind = getattr(cls._session_factory, "bind", None)
-            if bind is None:
-                bind = cls._session_factory.kw.get("bind")
-            if bind is not None:
-                await bind.dispose()
+            engine = cls._session_factory.kw["bind"]
+            await engine.dispose()
             cls._session_factory = None
 
 

@@ -14,4 +14,5 @@ class LoggingSettings(BaseSettings):
 
 @lru_cache
 def get_logging_settings() -> LoggingSettings:
+    """Get logging settings."""
     return LoggingSettings()  # type: ignore[call-arg]

@@ -5,7 +5,15 @@ from pydantic import BaseModel, Field
 
 
 class Product(BaseModel):
-    """Pydantic model aligned with the products database table."""
+    """Pydantic model aligned with the products database table.
+
+    :ivar id: Primary key; generated for new rows when using defaults.
+    :ivar created_at: UTC instant when the record was first stored.
+    :ivar name: Human-readable product title.
+    :ivar count: Available quantity in stock.
+    :ivar price: Unit price in the application currency.
+    :ivar description: Marketing or technical copy for the product.
+    """
 
     id: UUID = Field(default_factory=uuid4, description="Primary key; generated for new rows when using defaults.")
     created_at: datetime = Field(

@@ -3,11 +3,20 @@ name = "faststreamtemplate"
 version = "0.1.0"
 description = "Monorepo: common library + user (customer) and store (inventory) services"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.12"
+dependencies = [
+    "uvicorn[standard]>=0.30.0,<0.31.0",
+    "aio-pika>=9.6.2",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.136.1",
+    "faststream[cli,rabbit]>=0.6.7",
+    "pydantic>=2.13.3",
+    "pydantic-settings>=2.14.0",
+    "sqlalchemy>=2.0.31,<3.0.0",
+    "psycopg2-binary>=2.9.9,<3.0.0",
+    "alembic>=1.13.2,<2.0.0",
+]
 
 [tool.uv.workspace]
 members = ["common", "services/user_service", "services/store_service"]
 
-[dependency-groups]
-dev = []

@@ -15,10 +15,17 @@ from common.schemas import MessageStatusResponse, Product
 inventory_router = APIRouter()
 
 
-@inventory_router.post("/product", tags=["inventory"], response_model=MessageStatusResponse)
+@inventory_router.post("/product", tags=["inventory"])
 async def create_product(
     message: Product,
 ) -> MessageStatusResponse:
+    """
+    Create a new product.
+
+    :param message:
+    :return:
+    """
+
     await rabbit_broker.publish(
         message=message,
         queue=create_product_queue_init,
@@ -35,6 +42,13 @@ async def create_product(
 async def delete_product(
     message: Product,
 ) -> MessageStatusResponse:
+    """
+    Delete an existing product.
+
+    :param message:
+    :return:
+    """
+
     await rabbit_broker.publish(
         message=message,
         queue=delete_product_queue_init,
@@ -43,10 +57,17 @@ async def delete_product(
     return MessageStatusResponse(message=MessageStatus.OK)
 
 
-@inventory_router.put("/product", tags=["inventory"], response_model=MessageStatusResponse)
+@inventory_router.put("/product", tags=["inventory"])
 async def update_product(
     message: Product,
 ) -> MessageStatusResponse:
+    """
+    Update an existing product.
+
+    :param message:
+    :return:
+    """
+
     await rabbit_broker.publish(
         message=message,
         queue=update_product_queue_init,

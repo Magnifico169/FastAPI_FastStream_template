@@ -8,7 +8,7 @@
 
 ## Требования
 
-- Python 3.13+
+- Python 3.12+
 - [uv](https://docs.astral.sh/uv/)
 
 ## Установка зависимостей

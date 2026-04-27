@@ -5,7 +5,14 @@ from pydantic import BaseModel, Field
 
 
 class User(BaseModel):
-    """Pydantic model aligned with the users database table."""
+    """Pydantic model aligned with the users database table.
+
+    :ivar id: Primary key; generated for new rows when using defaults.
+    :ivar created_at: UTC instant when the record was first stored.
+    :ivar nickname: Public or internal display name for the user.
+    :ivar delivery_address: Default shipping or hand-off address.
+    :ivar status: Current lifecycle or verification state of the user.
+    """
 
     id: UUID = Field(default_factory=uuid4, description="Primary key; generated for new rows when using defaults.")
     created_at: datetime = Field(

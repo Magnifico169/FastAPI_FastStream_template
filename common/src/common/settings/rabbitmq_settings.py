@@ -5,6 +5,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class RabbitMQSettings(BaseSettings):
+    """RabbitMQ settings"""
+
     model_config = SettingsConfigDict(extra="ignore")
 
     RABBITMQ_SCHEME: str = Field(
@@ -18,6 +20,7 @@ class RabbitMQSettings(BaseSettings):
     RABBITMQ_VHOST: str = Field(default="/", description="RabbitMQ vhost")
 
     def get_rabbitmq_uri(self) -> str:
+        """RabbitMQ uri"""
         return str(
             AmqpDsn.build(
                 scheme=self.RABBITMQ_SCHEME,
@@ -32,4 +35,5 @@ class RabbitMQSettings(BaseSettings):
 
 @lru_cache
 def get_rabbitmq_settings() -> RabbitMQSettings:
+    """Get RabbitMQ settings"""
     return RabbitMQSettings()  # type: ignore[call-arg]

@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -10,10 +10,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 COPY pyproject.toml ./
 COPY common ./common
 COPY services ./services
-RUN uv sync --package store-service
-
-ENV PYTHONPATH=/app/services/store_service/src:/app/common/src
 ENV UV_LINK_MODE=copy
+RUN uv lock && uv sync --frozen
 
 EXPOSE 8001
 

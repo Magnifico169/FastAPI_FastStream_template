@@ -14,19 +14,27 @@ from common.messaging import (
     get_orders_into_exch_init,
     get_orders_queue_init,
     rabbit_broker,
+    root_logger,
     update_order_exch_init,
     update_order_queue_init,
 )
 from user_service.consumers import customer_routes  # noqa: F401
+from common.persistence import PostgresSessionFactory
 
-app = FastStream(rabbit_broker, specification=AsyncAPI())
+
+app = FastStream(rabbit_broker)
 
 
 @app.on_startup
-async def initialize_app() -> None:
-    from common.persistence import PostgresSessionFactory
+async def initialize_db() -> None:
+    """Initialize database connection."""
+    await PostgresSessionFactory.initialize()
+    root_logger.info("initialize db connection")
 
-    PostgresSessionFactory.initialize()
+
+@app.after_startup
+async def start_application() -> None:
+    """Initialize FastStream app."""
 
     create_user_exchange: aio_pika.RobustExchange = await rabbit_broker.declare_exchange(exchange=create_user_exch_init)
     create_user_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=create_user_queue_init)
