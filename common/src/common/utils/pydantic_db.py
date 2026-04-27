@@ -7,18 +7,11 @@ from datetime import date, datetime
 from typing import Any
 from uuid import UUID
 
-# Fields on the order row whose *values* are stored as JSON (nested UUID/datetime
-# must be stringified), while other columns keep native types for the DB driver.
 json_fields: frozenset[str] = frozenset({"products"})
 
 
 def _nested_json_compatible(obj: Any) -> Any:
-    """
-    Coerce a nested structure to JSON-encodable scalars and dicts (for JSONB).
-
-    Top-level :class:`uuid.UUID` and :class:`~datetime.datetime` are left to
-    normal ``model_dump()`` so TIMESTAMPTZ/UUID columns still receive real types.
-    """
+    """Coerce a nested structure to JSON-encodable scalars and dicts (for JSONB)."""
     if obj is None or isinstance(obj, (str, int, float, bool)):
         return obj
     if isinstance(obj, UUID):

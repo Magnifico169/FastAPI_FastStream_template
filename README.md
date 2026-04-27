@@ -16,7 +16,6 @@ FastStreamTemplate/
 |-- Makefile
 |-- docker-compose.yml
 |-- .env.example
-|-- .env                    # you create: copy from .env.example
 |-- common/
 |   +-- pyproject.toml
 |   +-- src/common/

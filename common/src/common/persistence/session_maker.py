@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from common.settings import get_postgres_settings
+from common.exceptions import SessionFactoryAlreadyInitializedError
 
 
 class PostgresSessionFactory:
@@ -31,7 +32,7 @@ class PostgresSessionFactory:
         """
         postgres_settings = get_postgres_settings()
         if cls._session_factory is not None:
-            raise RuntimeError("Session factory already initialized")
+            raise SessionFactoryAlreadyInitializedError
 
         async_driver = postgres_settings.POSTGRES_DRIVER
         database_url = postgres_settings.get_postgres_uri().replace(
@@ -71,7 +72,7 @@ class PostgresSessionFactory:
                 result = await session.execute(query)
         """
         if cls._session_factory is None:
-            raise RuntimeError("Session factory not initialized. Call initialize() first.")
+            raise SessionFactoryAlreadyInitializedError
 
         session = cls._session_factory()
         try:

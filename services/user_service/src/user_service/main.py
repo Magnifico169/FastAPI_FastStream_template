@@ -15,23 +15,23 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  #noqa:ARG001
     """Lifespan context manager."""
 
     await PostgresSessionFactory.initialize()
     try:
         await rabbit_broker.start()
     except ConnectionError as err:
-        logger.error("Connection error during start application: %s", err)
-        raise err
+        logger.exception("Connection error during start application: %s")
+        raise err from None
 
     yield
 
     try:
         await rabbit_broker.stop()
     except ConnectionError as err:
-        logger.error("Connection error during stop application: %s", err)
-        raise err
+        logger.exception("Connection error during stop application: %s")
+        raise err from None
     await PostgresSessionFactory.close()
 
 

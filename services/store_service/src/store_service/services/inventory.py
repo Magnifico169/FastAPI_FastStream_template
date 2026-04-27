@@ -34,11 +34,7 @@ class InventoryService:
         :return: Persisted product row after create or count update
         """
         inventory_product = await self.product_repository.filter_by(
-            **{
-                "name": product.name,
-                "price": product.price,
-                "created_at": product.created_at,
-            }
+            name=product.name, price=product.price, created_at=product.created_at
         )
 
         if not inventory_product:
@@ -54,11 +50,7 @@ class InventoryService:
         :return: Persisted product after update or create
         """
         inventory_product = await self.product_repository.filter_by(
-            **{
-                "name": product.name,
-                "price": product.price,
-                "created_at": product.created_at,
-            }
+            name=product.name, price=product.price, created_at=product.created_at
         )
         if not inventory_product:
             logger.warning("Product %s not found.", product.name)
@@ -75,7 +67,6 @@ class InventoryService:
         is_delete = await self.product_repository.delete(product.id)
         if not is_delete:
             logger.warning("Product %s not found.", product.name)
-        return None
 
 
 def get_inventory_service(

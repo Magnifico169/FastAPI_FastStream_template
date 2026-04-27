@@ -42,11 +42,7 @@ class UserService:
         """
         for product in order.products:
             inventory_product = await self.products_repository.filter_by(
-                **{
-                    "name": product.name,
-                    "price": product.price,
-                    "created_at": product.created_at,
-                }
+                name=product.name, price=product.price, created_at=product.created_at
             )
             if not inventory_product:
                 logger.warning("Product %s not found.", product.name)
@@ -93,7 +89,6 @@ class UserService:
         is_delete = await self.order_repository.delete(order.id)
         if not is_delete:
             logger.warning("Failed to delete order %s.", order.id)
-        return None
 
     async def get_orders_list(self, message: Order) -> list[Order] | None:
         """
@@ -102,7 +97,7 @@ class UserService:
         :param message: Carries user_id to filter
         :return: List of orders for that user, or None if no rows (also logs on empty)
         """
-        orders = await self.order_repository.filter_by(**{"user_id": message.user_id})
+        orders = await self.order_repository.filter_by(user_id=message.user_id)
         if not orders:
             logger.error("Order %s not found", message.user_id)
             return
