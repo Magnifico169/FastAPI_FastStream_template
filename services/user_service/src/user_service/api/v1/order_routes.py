@@ -27,6 +27,11 @@ order_router = APIRouter()
 async def get_order_status(message: OrderStatusRequestSchema) -> MessageStatusResponse:
     """
     Start async lookup of a single order (published to the worker queue).
+
+    POST is used because a JSON body is required; GET cannot carry a body in browsers.
+
+    :param message: Request with order id / user id as required by the worker
+    :return: 202 with PROCESSING; result is completed asynchronously
     """
 
     await rabbit_broker.publish(
@@ -36,6 +41,7 @@ async def get_order_status(message: OrderStatusRequestSchema) -> MessageStatusRe
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
+        status=status.HTTP_202_ACCEPTED,
     )
 
 
@@ -47,6 +53,11 @@ async def get_order_status(message: OrderStatusRequestSchema) -> MessageStatusRe
 async def get_orders_status(message: OrderStatusRequestSchema) -> MessageStatusResponse:
     """
     Start async lookup of orders for a user (published to the worker queue).
+
+    POST is used because a JSON body is required; GET cannot carry a body in browsers.
+
+    :param message: Request with user_id for the list query
+    :return: 202 with PROCESSING; result is completed asynchronously
     """
 
     await rabbit_broker.publish(
@@ -56,6 +67,7 @@ async def get_orders_status(message: OrderStatusRequestSchema) -> MessageStatusR
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
+        status=status.HTTP_202_ACCEPTED,
     )
 
 
@@ -66,10 +78,10 @@ async def get_orders_status(message: OrderStatusRequestSchema) -> MessageStatusR
 )
 async def create_order(message: OrderStatusRequestSchema) -> MessageStatusResponse:
     """
-    Create new order.
+    Enqueue new order creation: publish to the user-service worker for stock check and persist.
 
-    :param message:
-    :return:
+    :param message: Order and product lines to create
+    :return: 202 with PROCESSING; outcome is processed by the consumer
     """
 
     await rabbit_broker.publish(
@@ -79,8 +91,8 @@ async def create_order(message: OrderStatusRequestSchema) -> MessageStatusRespon
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
+        status=status.HTTP_202_ACCEPTED,
     )
-
 
 @order_router.delete(
     "/order",
@@ -89,10 +101,10 @@ async def create_order(message: OrderStatusRequestSchema) -> MessageStatusRespon
 )
 async def cancel_order(message: OrderStatusRequestSchema) -> MessageStatusResponse:
     """
-    Cancel order.
+    Enqueue order cancellation: publish delete request to the worker queue.
 
-    :param message:
-    :return:
+    :param message: Order reference to cancel
+    :return: 202 with PROCESSING; deletion runs asynchronously
     """
 
     await rabbit_broker.publish(
@@ -102,6 +114,7 @@ async def cancel_order(message: OrderStatusRequestSchema) -> MessageStatusRespon
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
+        status=status.HTTP_202_ACCEPTED,
     )
 
 
@@ -112,10 +125,10 @@ async def cancel_order(message: OrderStatusRequestSchema) -> MessageStatusRespon
 )
 async def update_order(message: OrderStatusRequestSchema) -> MessageStatusResponse:
     """
-    Update order.
+    Enqueue order update: publish changed fields to the worker queue.
 
-    :param message:
-    :return:
+    :param message: Order payload with id and fields to update
+    :return: 202 with PROCESSING; update runs asynchronously
     """
 
     await rabbit_broker.publish(
@@ -125,4 +138,5 @@ async def update_order(message: OrderStatusRequestSchema) -> MessageStatusRespon
     )
     return MessageStatusResponse(
         message=MessageStatus.PROCESSING,
+        status=status.HTTP_202_ACCEPTED,
     )

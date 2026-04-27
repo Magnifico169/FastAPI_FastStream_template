@@ -18,10 +18,10 @@ user_router = APIRouter()
 )
 async def create_user(message: UserInfoSchema) -> MessageStatusResponse:
     """
-    Create a new user.
+    Accept user registration: publish payload to the broker for async processing.
 
-    :param message:
-    :return:
+    :param message: User data to create
+    :return: 202 with PROCESSING status; the result is completed by the consumer
     """
 
     await rabbit_broker.publish(

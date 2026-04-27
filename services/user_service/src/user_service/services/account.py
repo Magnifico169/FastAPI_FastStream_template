@@ -19,17 +19,17 @@ class AccountService:
         """
         Init Account Service.
 
-        :param user_repository: UsersRepositoryDependence
+        :param user_repository: Persistence layer for users
         :return: None
         """
         self.user_repository = user_repository
 
     async def create_user(self, user: User) -> User:
         """
-        Create new user.
+        Persist a new user row.
 
-        :param user:
-        :return:
+        :param user: Domain user to store
+        :return: User model as saved in the database
         """
         return await self.user_repository.create(user)
 

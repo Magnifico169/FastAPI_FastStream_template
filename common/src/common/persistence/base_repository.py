@@ -19,6 +19,7 @@ class BaseRepository[ModelType: DeclarativeBase]:
 
         :param model: SQLAlchemy model class
         :param session: Async database session
+        :return: None
         """
         self.model = model
         self.session = session

@@ -20,10 +20,10 @@ async def create_product(
     message: Product,
 ) -> MessageStatusResponse:
     """
-    Create a new product.
+    Enqueue product creation: publish to the inventory worker queue.
 
-    :param message:
-    :return:
+    :param message: Product payload
+    :return: OK status after the message is accepted for delivery
     """
 
     await rabbit_broker.publish(
@@ -43,10 +43,10 @@ async def delete_product(
     message: Product,
 ) -> MessageStatusResponse:
     """
-    Delete an existing product.
+    Enqueue product deletion: publish to the inventory worker queue.
 
-    :param message:
-    :return:
+    :param message: Product to remove (e.g. by id)
+    :return: OK status after the message is accepted for delivery
     """
 
     await rabbit_broker.publish(
@@ -62,10 +62,10 @@ async def update_product(
     message: Product,
 ) -> MessageStatusResponse:
     """
-    Update an existing product.
+    Enqueue product update: publish to the inventory worker queue.
 
-    :param message:
-    :return:
+    :param message: Product fields to apply
+    :return: OK status after the message is accepted for delivery
     """
 
     await rabbit_broker.publish(

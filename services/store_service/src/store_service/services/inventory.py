@@ -22,16 +22,16 @@ class InventoryService:
         Initializes the Inventory_service service.
 
         :param product_repository: Product repository
-        :return None
+        :return: None
         """
         self.product_repository = product_repository
 
     async def add_product_to_inventory(self, product: Product) -> Product:
         """
-        Add product to inventory.
+        Add product to inventory: create row or increase count for matching name/price/created_at.
 
-        :param product:
-        :return:
+        :param product: Product to add or merge
+        :return: Persisted product row after create or count update
         """
         inventory_product = await self.product_repository.filter_by(
             **{
@@ -48,10 +48,10 @@ class InventoryService:
 
     async def update_product_inventory(self, product: Product) -> Product:
         """
-        Update product inventory.
+        Update matching inventory row, or create if no row matches the identity fields.
 
-        :param product:
-        :return:
+        :param product: New field values; missing row triggers create and warning
+        :return: Persisted product after update or create
         """
         inventory_product = await self.product_repository.filter_by(
             **{
@@ -67,10 +67,10 @@ class InventoryService:
 
     async def remove_product_from_inventory(self, product: Product) -> None:
         """
-        Remove product from inventory.
+        Remove product from inventory by id; logs a warning if id was not found.
 
-        :param product:
-        :return:
+        :param product: Product with id to delete
+        :return: None
         """
         is_delete = await self.product_repository.delete(product.id)
         if not is_delete:

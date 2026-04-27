@@ -27,11 +27,11 @@ logger = logging.getLogger(__name__)
 )
 async def create_user(message: User, account_service: AccountServiceDep) -> None:
     """
-    Create new user.
+    Create new user (Rabbit consumer): persist the user from the queue message.
 
-    :param message:
-    :param account_service:
-    :return:
+    :param message: User domain object from the broker
+    :param account_service: Injected account service
+    :return: None
     """
 
     await account_service.create_user(message)
@@ -44,11 +44,11 @@ async def create_user(message: User, account_service: AccountServiceDep) -> None
 )
 async def create_order(message: Order, user_service: UserServiceDep) -> None:
     """
-    Create new order.
+    Create new order: validate stock and persist the order for the user.
 
-    :param message:
-    :param user_service:
-    :return:
+    :param message: Order domain object from the broker
+    :param user_service: Injected user service
+    :return: None
     """
 
     await user_service.create_order(message)
@@ -64,11 +64,11 @@ async def update_order(
     user_service: UserServiceDep,
 ) -> None:
     """
-    Update existing order.
+    Update existing order in storage from the message payload.
 
-    :param message:
-    :param user_service:
-    :return:
+    :param message: Order with fields to apply
+    :param user_service: Injected user service
+    :return: None
     """
 
     order = await user_service.edit_order(message)
@@ -81,11 +81,11 @@ async def update_order(
 )
 async def cancel_order(message: Order, user_service: UserServiceDep) -> None:
     """
-    Cancel existing order.
+    Cancel (delete) an order identified by the message.
 
-    :param message:
-    :param user_service:
-    :return:
+    :param message: Order reference (e.g. id) for cancellation
+    :param user_service: Injected user service
+    :return: None
     """
 
     await user_service.cancel_order(message)
@@ -101,11 +101,11 @@ async def get_orders(
     user_service: UserServiceDep,
 ) -> None:
     """
-    Get all orders.
+    Load all orders for the user id carried in the message (async reply path in service).
 
-    :param message:
-    :param user_service:
-    :return:
+    :param message: Order-shaped message with user_id set
+    :param user_service: Injected user service
+    :return: None
     """
 
     await user_service.get_orders_list(message)
@@ -121,11 +121,11 @@ async def get_order(
     user_service: UserServiceDep,
 ) -> None:
     """
-    Get current order.
+    Load a single order by id from the message.
 
-    :param message:
-    :param user_service:
-    :return:
+    :param message: Order with id to fetch
+    :param user_service: Injected user service
+    :return: None
     """
 
     await user_service.get_order(message)

@@ -11,8 +11,7 @@ class ProductsRepository(BaseRepository[Product]):
         """
         Init Product Repository class.
 
-        :param session: SQLAlchemy session
-        :type session: sqlalchemy.orm.session.Session
+        :param session: Async SQLAlchemy session for this request scope
         :return: None
         """
         super().__init__(session, Product)

@@ -27,7 +27,7 @@ async def initialize_db() -> None:
 @app.after_startup
 async def initialize_app() -> None:
     """
-    Initialize FastStream app.
+    Declare product inventory exchanges/queues and bind them on broker startup.
 
     :return: None
     """

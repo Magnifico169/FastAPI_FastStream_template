@@ -8,6 +8,11 @@ class UsersRepository(BaseRepository[User]):
     """User Repository."""
 
     def __init__(self, session: AsyncSession) -> None:
-        """Init UsersRepository."""
+        """
+        Init UsersRepository.
+
+        :param session: Async SQLAlchemy session for this request scope
+        :return: None
+        """
 
         super().__init__(session, User)

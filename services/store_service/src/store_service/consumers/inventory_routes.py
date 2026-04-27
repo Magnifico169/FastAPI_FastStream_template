@@ -24,10 +24,10 @@ async def create_product(
     inventory_service: InventoryServiceDep,
 ) -> None:
     """
-    Create a new user.
+    Create or merge a product in inventory (Rabbit consumer).
 
-    :param inventory_service:
-    :param message:
+    :param message: Product domain object from the broker
+    :param inventory_service: Injected inventory service
     :return: None
     """
     await inventory_service.add_product_to_inventory(message)
@@ -43,11 +43,11 @@ async def update_product(
     inventory_service: InventoryServiceDep,
 ) -> None:
     """
-    Update an existing order.
+    Update product rows in the inventory to match the message.
 
-    :param message:
-    :param inventory_service:
-    :return:
+    :param message: Product with new values
+    :param inventory_service: Injected inventory service
+    :return: None
     """
     await inventory_service.update_product_inventory(message)
     logger.info("Product %s successfully updated", message)
@@ -62,11 +62,11 @@ async def delete_product(
     inventory_service: InventoryServiceDep,
 ) -> None:
     """
-    Delete an existing product.
+    Remove a product from inventory by id from the message.
 
-    :param message:
-    :param inventory_service:
-    :return:
+    :param message: Product id / identity for deletion
+    :param inventory_service: Injected inventory service
+    :return: None
     """
     await inventory_service.remove_product_from_inventory(message)
     logger.info("Product %s successfully deleted", message)

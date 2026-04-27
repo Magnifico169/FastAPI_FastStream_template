@@ -26,8 +26,8 @@ class UserService:
         """
         Init UserService.
 
-        :param products_repository: ProductsRepositoryDependence
-        :param order_repository: OrdersRepositoryDependence
+        :param products_repository: Store inventory product rows (stock)
+        :param order_repository: Order persistence
         :return: None
         """
         self.products_repository = products_repository
@@ -35,10 +35,10 @@ class UserService:
 
     async def create_order(self, order: Order) -> Order | None:
         """
-        Create new order.
+        Reserve stock for each line and insert the order; skips missing products, aborts on stock.
 
-        :param order:
-        :return:
+        :param order: Order with product lines
+        :return: Created order model, or None if any line is out of stock
         """
         for product in order.products:
             inventory_product = await self.products_repository.filter_by(
@@ -67,10 +67,10 @@ class UserService:
 
     async def edit_order(self, order: Order) -> Order | None:
         """
-        Edit existing order.
+        Replace an existing order’s fields with the given payload (partial update via model_dump).
 
-        :param order:
-        :return:
+        :param order: Order id and new values
+        :return: Updated order model, or None if the order id was not found
         """
         existing_order = await self.order_repository.get(order.id)
         if not existing_order:
@@ -85,10 +85,10 @@ class UserService:
 
     async def cancel_order(self, order: Order) -> None:
         """
-        Cancel existing order.
+        Delete an order by id; logs a warning if the row did not exist.
 
-        :param order:
-        :return:
+        :param order: Order whose id to delete
+        :return: None
         """
         is_delete = await self.order_repository.delete(order.id)
         if not is_delete:
@@ -97,10 +97,10 @@ class UserService:
 
     async def get_orders_list(self, message: Order) -> list[Order] | None:
         """
-        Get list of orders.
+        Load orders for message.user_id from storage.
 
-        :param message:
-        :return:
+        :param message: Carries user_id to filter
+        :return: List of orders for that user, or None if no rows (also logs on empty)
         """
         orders = await self.order_repository.filter_by(**{"user_id": message.user_id})
         if not orders:
@@ -109,10 +109,10 @@ class UserService:
 
     async def get_order(self, message: Order) -> Order | None:
         """
-        Get order by id.
+        Fetch a single order by message.id.
 
-        :param message:
-        :return:
+        :param message: Order with id to load
+        :return: Order row, or None if not found
         """
         order = await self.order_repository.get(message.id)
         if not order:
