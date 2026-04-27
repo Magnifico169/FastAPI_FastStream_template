@@ -1,15 +1,8 @@
-# Контекст сборки — корень репозитория; в демон уходят только неигнорированные пути.
-.git
 .venv
-**/__pycache__
-**/*.py[cod]
+__pycache__
+*.pyc
 .pytest_cache
 .mypy_cache
 .ruff_cache
-.cursor
-terminals
-*.log
-*.md
-!README.md
-docker-compose*.yaml
-.github
+.git
+.ai

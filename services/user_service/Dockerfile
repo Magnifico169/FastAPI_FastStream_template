@@ -1,0 +1,20 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml ./
+COPY common ./common
+COPY services ./services
+RUN uv sync --package user-service
+
+ENV PYTHONPATH=/app/services/user_service/src:/app/common/src
+ENV UV_LINK_MODE=copy
+
+EXPOSE 8000
+
+CMD ["uv", "run", "--package", "user-service", "python", "-m", "user_service.main"]

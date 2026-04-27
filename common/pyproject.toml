@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "common"
+version = "0.1.0"
+description = "Shared schemas, settings, persistence, and messaging for shop services"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.13.3",
+    "pydantic-settings>=2.14.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "asyncpg>=0.30.0",
+    "fastapi>=0.136.1",
+    "faststream>=0.6.7",
+    "fast-depends>=3.0.8",
+    "aio-pika>=9.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

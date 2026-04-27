@@ -1,26 +1,62 @@
-# Сервис для обработки заказов
+# FastStream monorepo (user + store)
 
-## Запуск в Docker
+Репозиторий разделён на:
 
-Скопируйте `.env.example` в `.env`, при необходимости отредактируйте значения. Затем:
+- `common` — Pydantic-схемы, domain-модели, настройки, общий доступ к БД (SQLAlchemy), брокер RabbitMQ.
+- `services/user_service` — API и воркер для сценария **покупателя** (пользователи, заказы).
+- `services/store_service` — API и воркер для **магазина** (каталог / склад, CRUD товаров).
+
+## Требования
+
+- Python 3.13+
+- [uv](https://docs.astral.sh/uv/)
+
+## Установка зависимостей
+
+Из корня репозитория:
 
 ```bash
-docker compose up --build
+uv sync
 ```
 
-## Сервисы:
-* api-service: REST-шлюз (FastAPI)
-* order-service: создание и управление заказами
-* notification-service: обработка событий о заказах и отправка уведомлений
+Сгенерировать зафиксированный lockfile (для `--frozen` в CI/Docker по желанию):
 
-### `api_service`:
+```bash
+uv lock
+```
 
-**HTTP endpoints**:
-* `POST /orders` -- создание заказа через `order-service`
-* `GET /orders` --- получение списка заказов для конкретного пользователя
-* `GET /order` -- получение информации о статусе заказа
+## Локальный запуск
 
-### `order_service`:
+1. Скопируйте `.env.example` в `.env` и задайте `POSTGRES_PASSWORD`, `RABBITMQ_DEFAULT_PASS` и т.д.
 
-**FastStream endpoints**:
-* `/orders` -- создание
+2. Сервисы (порты: пользователь `8000`, магазин `8001`):
+
+```bash
+# User API
+uv run --package user-service python -m user_service.main
+
+# User worker
+uv run --package user-service faststream run user_service.application.faststream_app:app
+
+# Store API
+uv run --package store-service python -m store_service.main
+
+# Store worker
+uv run --package store-service faststream run store_service.application.faststream_app:app
+```
+
+`PYTHONPATH` при работе из корня обычно не нужен: пакеты ставятся editable через `uv sync`.
+
+## Docker
+
+```bash
+make up
+# или: docker compose up --build
+```
+
+Сервисы: `user-api` (:8000), `user-worker`, `store-api` (:8001), `store-worker`, `postgres`, `rabbitmq`.
+
+## Примечания
+
+- Схема БД: в репозитории нет миграций; при необходимости добавьте Alembic или `create_all` при старте.
+- `user` и `store` сервисы по-прежнему используют **одну** PostgreSQL и общие таблицы; дальнейшее разделение БД — отдельный шаг.

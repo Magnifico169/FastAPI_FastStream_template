@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "user-service"
+version = "0.1.0"
+description = "Customer-facing API and workers (users, orders)"
+requires-python = ">=3.13"
+dependencies = [
+    "common",
+    "fastapi>=0.136.1",
+    "uvicorn>=0.46.0",
+    "faststream>=0.6.7",
+    "fast-depends>=3.0.8",
+    "aio-pika>=9.0.0",
+]
+
+[tool.uv.sources]
+common = { path = "../../common", editable = true }
+
+[tool.setuptools.packages.find]
+where = ["src"]
