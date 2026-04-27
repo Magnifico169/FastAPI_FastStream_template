@@ -1,8 +1,9 @@
 from datetime import UTC, datetime
-from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
+
+from models.domain.product import Product
 
 
 class Order(BaseModel):
@@ -10,7 +11,7 @@ class Order(BaseModel):
 
     :ivar id: Primary key; generated for new rows when using defaults.
     :ivar created_at: UTC instant when the record was first stored.
-    :ivar products: Line items and extra data, matching the database JSON column.
+    :ivar products: Product instance from DB.
     :ivar user_id: User who placed the order.
     :ivar address: Destination address for delivery.
     :ivar delivery_date: Expected or scheduled delivery time.
@@ -21,8 +22,8 @@ class Order(BaseModel):
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC), description="UTC instant when the record was first stored."
     )
-    products: list[dict[str, Any]] = Field(
-        ..., description="Line items and extra data, matching the database JSON column."
+    products: list[Product] = Field(
+        default_factory=list, description="Line items and extra data, matching the database JSON column."
     )
     user_id: UUID = Field(..., description="User who placed the order.")
     address: str = Field(..., description="Destination address for delivery.")

@@ -1,10 +1,10 @@
 from sqlalchemy.orm import MappedColumn
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, UniqueConstraint
 
 from base_table import BaseTable
 
 
-class Products(BaseTable):
+class Product(BaseTable):
     """ORM mapping for the products table.
 
     :ivar name: Product title.
@@ -14,6 +14,8 @@ class Products(BaseTable):
     """
 
     __tablename__ = "products"
+
+    __table_args__ = UniqueConstraint("name", "price", "created_at", name="uq_products_name_price_created_at")
 
     name: MappedColumn[str] = Column(String(), nullable=False)
     count: MappedColumn[int] = Column(Integer(), nullable=False)

@@ -1,12 +1,12 @@
 from fastapi import APIRouter, status
 
-from infrastructure.rabbit import (
+from infrastructure.rabbit.rabbit import (
     create_user_exch_init,
     create_user_queue_init,
     rabbit_broker,
 )
-from models.schemas.response import MessageStatusResponse
-from models.schemas import UserInfoSchema
+from core.models.schemas import UserInfoSchema, MessageStatusResponse
+from core.constants.message_status import MessageStatus
 
 user_router = APIRouter()
 
@@ -17,13 +17,16 @@ user_router = APIRouter()
     response_model=MessageStatusResponse,
     tags=["user"],
 )
-async def create_user(body: UserInfoSchema) -> MessageStatusResponse:
+async def create_user(message: UserInfoSchema) -> MessageStatusResponse:
+    """
+    Create a new user.
+
+    :param message:
+    :return:
+    """
     await rabbit_broker.publish(
-        body,
+        message,
         queue=create_user_queue_init,
         exchange=create_user_exch_init,
     )
-    return MessageStatusResponse(
-        message="processing",
-        status=status.HTTP_202_ACCEPTED,
-    )
+    return MessageStatusResponse(message=MessageStatus.PROCESSING)

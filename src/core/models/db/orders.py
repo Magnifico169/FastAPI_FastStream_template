@@ -7,7 +7,7 @@ from sqlalchemy import JSON, Column, Uuid, String, DateTime
 from base_table import BaseTable
 
 
-class Orders(BaseTable):
+class Order(BaseTable):
     """ORM mapping for the orders table.
 
     :ivar products: Line items and metadata, stored as JSON.

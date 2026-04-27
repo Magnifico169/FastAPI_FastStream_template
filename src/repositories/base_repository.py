@@ -1,12 +1,11 @@
-from typing import TypeVar, Type
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
-ModelType = TypeVar("ModelType", bound=DeclarativeBase)
 
-
-class BaseRepository:
+class BaseRepository[ModelType: DeclarativeBase]:
     """
     Base repository class providing basic CRUD operations for database models.
 
@@ -14,7 +13,7 @@ class BaseRepository:
     :param session: Async database session
     """
 
-    def __init__(self, session: AsyncSession, model: Type[ModelType]) -> None:
+    def __init__(self, session: AsyncSession, model: type[ModelType]) -> None:
         """
         Initialize repository with model and session.
 
@@ -67,7 +66,7 @@ class BaseRepository:
         await self.session.refresh(db_obj)
         return db_obj
 
-    async def delete(self, obg_id: int) -> bool:
+    async def delete(self, obg_id: UUID) -> bool:
         """
         Delete a record by ID.
 
@@ -81,7 +80,7 @@ class BaseRepository:
             return True
         return False
 
-    async def get(self, obg_id: int) -> ModelType | None:
+    async def get(self, obg_id: UUID) -> ModelType | None:
         """
         Get a record by ID.
 
@@ -97,5 +96,20 @@ class BaseRepository:
         :returns: List of model instances
         """
         stmt = select(self.model)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def filter_by(self, **kwargs) -> list[ModelType]:
+        """
+        Filter records by field values.
+
+        :param kwargs: Field=value filters
+        :returns: List of matching model instances
+        """
+        stmt = select(self.model)
+        for key, value in kwargs.items():
+            if hasattr(self.model, key):
+                stmt = stmt.where(getattr(self.model, key) == value)
+
         result = await self.session.execute(stmt)
         return list(result.scalars().all())

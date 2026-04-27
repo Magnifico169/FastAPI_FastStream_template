@@ -8,8 +8,8 @@ from infrastructure.rabbit.rabbit import (
     create_order_queue_init,
     create_user_exch_init,
     create_user_queue_init,
-    delete_order_exch_init,
-    delete_order_queue_init,
+    cancel_order_exch_init,
+    cancel_order_queue_init,
     get_order_into_exch_init,
     get_order_queue_init,
     get_orders_into_exch_init,
@@ -17,6 +17,12 @@ from infrastructure.rabbit.rabbit import (
     rabbit_broker,
     update_order_exch_init,
     update_order_queue_init,
+    create_product_queue_init,
+    create_product_exch_init,
+    update_product_queue_init,
+    update_product_exch_init,
+    delete_product_queue_init,
+    delete_product_exch_init,
 )
 
 
@@ -41,11 +47,11 @@ async def initialize_app() -> None:
     update_order_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=update_order_queue_init)
     await update_order_queue.bind(exchange=update_order_exchange)
 
-    delete_order_exchange: aio_pika.RobustExchange = await rabbit_broker.declare_exchange(
-        exchange=delete_order_exch_init,
+    cancel_order_exchange: aio_pika.RobustExchange = await rabbit_broker.declare_exchange(
+        exchange=cancel_order_exch_init,
     )
-    delete_order_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=delete_order_queue_init)
-    await delete_order_queue.bind(exchange=delete_order_exchange)
+    cancel_order_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=cancel_order_queue_init)
+    await cancel_order_queue.bind(exchange=cancel_order_exchange)
 
     get_orders_into_exchange: aio_pika.RobustExchange = await rabbit_broker.declare_exchange(
         exchange=get_orders_into_exch_init,
@@ -58,3 +64,12 @@ async def initialize_app() -> None:
     )
     get_order_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=get_order_queue_init)
     await get_order_queue.bind(exchange=get_order_into_exchange)
+
+    create_product_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=create_product_queue_init)
+    await create_product_queue.bind(exchange=create_product_exch_init)
+
+    update_product_queue: aio_pika.RobustQueue = await rabbit_broker.declare_queue(queue=update_product_queue_init)
+    await update_product_queue.bind(exchange=update_product_exch_init)
+
+    delete_product_queue: aio_pika.RobustQueue = await rabbit_broker.delete_queue(queue=delete_product_queue_init)
+    await delete_product_queue.bind(exchange=delete_product_exch_init)

@@ -1,13 +1,10 @@
-from typing import Annotated, Final
-from uuid import UUID
+from fastapi import APIRouter, status
 
-from fastapi import APIRouter, HTTPException, Query, status
-
-from infrastructure.rabbit import (
+from infrastructure.rabbit.rabbit import (
     create_order_exch_init,
     create_order_queue_init,
-    delete_order_exch_init,
-    delete_order_queue_init,
+    cancel_order_exch_init,
+    cancel_order_queue_init,
     get_order_into_exch_init,
     get_order_queue_init,
     get_orders_into_exch_init,
@@ -16,10 +13,9 @@ from infrastructure.rabbit import (
     update_order_exch_init,
     update_order_queue_init,
 )
-from models.schemas import OrderStatusRequestSchema, OrderStatusResponseSchema
-from models.schemas.response import MessageStatusResponse
+from models.schemas import OrderStatusRequestSchema, MessageStatusResponse
+from core.constants import MessageStatus
 
-ALL_ORDERS_STATUS_ORDER_ID: Final[UUID] = UUID("00000000-0000-0000-0000-000000000000")
 
 order_router = APIRouter()
 
@@ -30,23 +26,19 @@ order_router = APIRouter()
     response_model=MessageStatusResponse,
     tags=["order"],
 )
-async def get_order_status(
-    order_id: Annotated[UUID, Query()],
-    user_id: Annotated[UUID, Query()],
-) -> MessageStatusResponse:
-    if order_id == ALL_ORDERS_STATUS_ORDER_ID:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="invalid order_id for single order status",
-        )
-    payload = OrderStatusRequestSchema(order_id=order_id, user_id=user_id)
+async def get_order_status(message: OrderStatusRequestSchema) -> MessageStatusResponse:
+    """
+
+    :param message:
+    :return:
+    """
     await rabbit_broker.publish(
-        payload,
+        message=message,
         queue=get_order_queue_init,
         exchange=get_order_into_exch_init,
     )
     return MessageStatusResponse(
-        message="processing",
+        message=MessageStatus.PROCESSING,
         status=status.HTTP_202_ACCEPTED,
     )
 
@@ -57,23 +49,19 @@ async def get_order_status(
     response_model=MessageStatusResponse,
     tags=["order"],
 )
-async def get_orders_status(
-    user_id: Annotated[UUID, Query()],
-    order_id: Annotated[UUID, Query()] = ALL_ORDERS_STATUS_ORDER_ID,
-) -> MessageStatusResponse:
-    if order_id != ALL_ORDERS_STATUS_ORDER_ID:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="invalid order_id for orders list",
-        )
-    payload = OrderStatusRequestSchema(order_id=order_id, user_id=user_id)
+async def get_orders_status(message: OrderStatusRequestSchema) -> MessageStatusResponse:
+    """
+
+    :param message:
+    :return:
+    """
     await rabbit_broker.publish(
-        payload,
+        message=message,
         queue=get_orders_queue_init,
         exchange=get_orders_into_exch_init,
     )
     return MessageStatusResponse(
-        message="processing",
+        message=MessageStatus.PROCESSING,
         status=status.HTTP_202_ACCEPTED,
     )
 
@@ -84,14 +72,19 @@ async def get_orders_status(
     response_model=MessageStatusResponse,
     tags=["order"],
 )
-async def create_order(body: OrderStatusResponseSchema) -> MessageStatusResponse:
+async def create_order(message: OrderStatusRequestSchema) -> MessageStatusResponse:
+    """
+
+    :param message:
+    :return:
+    """
     await rabbit_broker.publish(
-        body,
+        message=message,
         queue=create_order_queue_init,
         exchange=create_order_exch_init,
     )
     return MessageStatusResponse(
-        message="processing",
+        message=MessageStatus.PROCESSING,
         status=status.HTTP_202_ACCEPTED,
     )
 
@@ -102,18 +95,19 @@ async def create_order(body: OrderStatusResponseSchema) -> MessageStatusResponse
     response_model=MessageStatusResponse,
     tags=["order"],
 )
-async def delete_order(
-    order_id: Annotated[UUID, Query()],
-    user_id: Annotated[UUID, Query()],
-) -> MessageStatusResponse:
-    payload = OrderStatusRequestSchema(order_id=order_id, user_id=user_id)
+async def cancel_order(message: OrderStatusRequestSchema) -> MessageStatusResponse:
+    """
+
+    :param message:
+    :return:
+    """
     await rabbit_broker.publish(
-        payload,
-        queue=delete_order_queue_init,
-        exchange=delete_order_exch_init,
+        message=message,
+        queue=cancel_order_queue_init,
+        exchange=cancel_order_exch_init,
     )
     return MessageStatusResponse(
-        message="processing",
+        message=MessageStatus.PROCESSING,
         status=status.HTTP_202_ACCEPTED,
     )
 
@@ -124,13 +118,13 @@ async def delete_order(
     response_model=MessageStatusResponse,
     tags=["order"],
 )
-async def update_order(body: OrderStatusResponseSchema) -> MessageStatusResponse:
+async def update_order(message: OrderStatusRequestSchema) -> MessageStatusResponse:
     await rabbit_broker.publish(
-        body,
+        message=message,
         queue=update_order_queue_init,
         exchange=update_order_exch_init,
     )
     return MessageStatusResponse(
-        message="processing",
+        message=MessageStatus.PROCESSING,
         status=status.HTTP_202_ACCEPTED,
     )

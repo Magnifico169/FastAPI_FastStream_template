@@ -19,8 +19,8 @@ create_order_queue_init = RabbitQueue("create_order_queue", durable=True)
 update_order_exch_init = RabbitExchange("update_order_exchange", type=ExchangeType.DIRECT, durable=True)
 update_order_queue_init = RabbitQueue("update_order_queue", durable=True)
 
-delete_order_exch_init = RabbitExchange("delete_order_exchange", type=ExchangeType.DIRECT, durable=True)
-delete_order_queue_init = RabbitQueue("delete_order_queue", durable=True)
+cancel_order_exch_init = RabbitExchange("cancel_order_exchange", type=ExchangeType.DIRECT, durable=True)
+cancel_order_queue_init = RabbitQueue("cancel_order_queue", durable=True)
 
 get_order_into_exch_init = RabbitExchange("get_order_into_exchange", type=ExchangeType.DIRECT, durable=True)
 get_order_queue_init = RabbitQueue("get_order_queue", durable=True)
@@ -28,6 +28,15 @@ get_order_queue_init = RabbitQueue("get_order_queue", durable=True)
 get_orders_into_exch_init = RabbitExchange("get_orders_into_exchange", durable=True)
 get_orders_queue_init = RabbitQueue("get_orders_queue", durable=True)
 
+
+create_product_exch_init = RabbitExchange("create_product_exchange", type=ExchangeType.DIRECT, durable=True)
+create_product_queue_init = RabbitQueue("create_product_queue", durable=True)
+
+update_product_exch_init = RabbitExchange("update_product_exchange", type=ExchangeType.DIRECT, durable=True)
+update_product_queue_init = RabbitQueue("update_product_queue", durable=True)
+
+delete_product_exch_init = RabbitExchange("delete_product_exchange", type=ExchangeType.DIRECT, durable=True)
+delete_product_queue_init = RabbitQueue("delete_product_queue", durable=True)
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)

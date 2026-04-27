@@ -4,7 +4,7 @@ from sqlalchemy import Column, String
 from base_table import BaseTable
 
 
-class Users(BaseTable):
+class User(BaseTable):
     """ORM mapping for the users table.
 
     :ivar nickname: Public or internal name for the user.

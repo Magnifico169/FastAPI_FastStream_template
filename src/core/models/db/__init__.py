@@ -1,10 +1,10 @@
-from .orders import Orders
-from .products import Products
-from .users import Users
+from .orders import Order
+from .products import Product
+from .users import User
 
 
 __all__ = [
-    "Orders",
-    "Products",
-    "Users",
+    "Order",
+    "Product",
+    "User",
 ]

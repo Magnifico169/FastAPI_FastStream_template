@@ -1,12 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.base_repository import BaseRepository
-from core.models.db.orders import Orders
+from core.models.db.orders import Order
 
 
-class OrderRepository(BaseRepository):
+class OrdersRepository(BaseRepository[Order]):
     """
     Repository for orders
     """
+
     def __init__(self, session: AsyncSession) -> None:
-        super().__init__(session, Orders)
+        super().__init__(session, Order)
