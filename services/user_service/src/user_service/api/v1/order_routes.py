@@ -94,6 +94,7 @@ async def create_order(message: OrderStatusRequestSchema) -> MessageStatusRespon
         status=status.HTTP_202_ACCEPTED,
     )
 
+
 @order_router.delete(
     "/order",
     status_code=status.HTTP_202_ACCEPTED,

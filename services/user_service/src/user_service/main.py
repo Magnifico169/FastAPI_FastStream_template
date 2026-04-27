@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  #noqa:ARG001
+async def lifespan(app: FastAPI):  # noqa:ARG001
     """Lifespan context manager."""
 
     await PostgresSessionFactory.initialize()
