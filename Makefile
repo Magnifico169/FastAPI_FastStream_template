@@ -1,4 +1,4 @@
-.PHONY: sync lock up down
+.PHONY: sync lock up down run
 
 sync:
 	uv sync
@@ -11,3 +11,6 @@ up:
 
 down:
 	docker compose down
+
+run:
+	uv run --env PYTHONPATH=src python -m app.main

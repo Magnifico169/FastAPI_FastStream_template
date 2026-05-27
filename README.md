@@ -74,7 +74,13 @@ RABBITMQ_HOST=localhost
 Run the app:
 
 ```bash
-uv run python -m app.main
+uv run --env PYTHONPATH=src python -m app.main
+```
+
+Or via Makefile:
+
+```bash
+make run
 ```
 
 ## How to extend

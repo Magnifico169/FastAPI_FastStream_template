@@ -7,10 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
 ENV UV_LINK_MODE=copy
-RUN uv sync --frozen
+ENV PYTHONPATH=/app/src
+RUN uv sync --frozen --no-group dev
 
 EXPOSE 8000
 
