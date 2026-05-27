@@ -1,0 +1,90 @@
+[project]
+name = "faststream-template"
+version = "0.1.0"
+description = "Minimal FastAPI + FastStream (RabbitMQ) template"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "uvicorn[standard]>=0.30.0,<0.31.0",
+    "aio-pika>=9.6.2",
+    "fastapi>=0.136.1",
+    "faststream[rabbit]>=0.6.7",
+    "pydantic>=2.13.3",
+    "pydantic-settings>=2.14.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.5,<1.0.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "N",
+    "UP",
+    "B",
+    "C4",
+    "DTZ",
+    "T10",
+    "EM",
+    "ISC",
+    "ICN",
+    "PIE",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SIM",
+    "TID",
+    "TCH",
+    "ARG",
+    "PTH",
+    "ERA",
+    "PGH",
+    "PL",
+    "TRY",
+    "AIR",
+    "PERF",
+    "FURB",
+    "LOG",
+    "RUF",
+]
+ignore = [
+    "E501",
+    "B008",
+    "PLR0913",
+    "PLR2004",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "RUF022",
+    "PLR0911",
+]
+fixable = ["ALL"]
+unfixable = []
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"
+multiline-quotes = "double"
+docstring-quotes = "double"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
