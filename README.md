@@ -1,131 +1,99 @@
-# FastStream monorepo (user + store)
+# FastStream Template
 
-## What this project is
+Minimal **FastAPI + FastStream (RabbitMQ)** example in a single process. An HTTP endpoint accepts JSON, publishes a message to RabbitMQ, and a FastStream subscriber processes it.
 
-This repository is a **uv workspace** with three Python packages: shared **`common`** library and two services, **`user_service`** and **`store_service`**. Each service ships a **FastAPI** app and a **FastStream** (RabbitMQ) worker.
+## Flow
 
-The flow is: HTTP handlers accept JSON, publish domain messages to **RabbitMQ** queues, and **FastStream** subscribers perform database work (Postgres via **SQLAlchemy**). The **user** side covers registration and orders; the **store** side maintains product inventory. Both use the same database and shared schemas in `common`.
+```text
+POST /messages  →  rabbit_broker.publish  →  RabbitMQ  →  @rabbit_router.subscriber
+```
 
-## Project structure (schematic)
+## Project structure
 
 ```text
 FastStreamTemplate/
-|-- pyproject.toml
-|-- uv.lock
-|-- alembic.ini
-|-- Makefile
-|-- docker-compose.yml
-|-- .env.example
-|-- common/
-|   +-- pyproject.toml
-|   +-- src/common/
-|       |-- domain/         # Pydantic domain types (User, Order, Product, …)
-|       |-- schemas/        # API / message schemas
-|       |-- persistence/    # SQLAlchemy session, base repository, ORM models
-|       +-- messaging/      # Rabbit broker, exchanges / queues, FastStream router
-|-- services/
-|   |-- user_service/
-|   |   |-- pyproject.toml
-|   |   +-- src/user_service/
-|   |       |-- main.py                    # FastAPI, port 8000
-|   |       |-- application/
-|   |       |   +-- faststream_app.py     # FastStream app (worker)
-|   |       |-- api/v1/                   # user_routes, order_routes
-|   |       +-- consumers/                 # Rabbit subscribers (e.g. customer_routes)
-|   +-- store_service/
-|       |-- pyproject.toml
-|       +-- src/store_service/
-|           |-- main.py                    # FastAPI, port 8001
-|           |-- application/
-|           |   +-- faststream_app.py
-|           +-- api/v1/                    # inventory_routes
-|           +-- consumers/
-+-- alembic/
-    +-- env.py
+├── pyproject.toml
+├── docker-compose.yml
+├── Dockerfile
+├── .env.example
+└── src/app/
+    ├── main.py           # FastAPI app, broker lifecycle
+    ├── messaging.py      # RabbitRouter, exchange, queue
+    ├── settings.py       # RabbitMQ config
+    ├── schemas.py        # Request/response models
+    ├── api/routes.py     # POST /messages
+    └── consumers/handler.py  # Message subscriber
 ```
 
-(Exact file counts can vary; this matches the main layout.)
+## Requirements
 
-## What you need to run
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/)
+- RabbitMQ (local or via Docker)
 
-- **Python** 3.12+
-- **uv** — [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/)
-- **Postgres** and **RabbitMQ** — running locally, in Docker, or remote, as long as your `.env` can reach them
+## Quick start
 
-## Environment (`.env`)
-
-1. From the repository root, copy the example file:
+1. Copy environment file:
 
    ```bash
    cp .env.example .env
    ```
 
-2. Set at least the secrets and hosts your deployment needs. The template defines:
+2. Install dependencies:
 
-   | Area | Variables (from `.env.example`) |
-   |------|----------------------------------|
-   | Postgres | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DRIVER` |
-   | RabbitMQ (broker URL pieces) | `RABBITMQ_SCHEME`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `RABBITMQ_VHOST` |
-   | Docker Rabbit image | `RABBITMQ_DEFAULT_USER`, `RABBITMQ_DEFAULT_PASS` |
+   ```bash
+   uv sync
+   ```
 
-3. If you use **Docker Compose** for Postgres but run **apps on the host**, map the published DB port: set `POSTGRES_HOST=localhost` and `POSTGRES_PORT=5433` (see `docker-compose.yml`: `5433:5432`).
+3. Start RabbitMQ and the app:
 
-## Install dependencies
+   ```bash
+   docker compose up --build
+   ```
 
-```bash
-uv sync
+4. Send a message:
+
+   ```bash
+   curl -X POST http://localhost:8000/messages \
+     -H "Content-Type: application/json" \
+     -d '{"text":"hello"}'
+   ```
+
+   Expected response: `202 Accepted` with `{"status":"processing"}`.
+
+   Check app logs for: `Received message: hello`.
+
+## Run locally (without Docker for the app)
+
+Start RabbitMQ (e.g. via `docker compose up rabbitmq -d`), then set in `.env`:
+
+```text
+RABBITMQ_HOST=localhost
 ```
 
-Refresh the lockfile when dependencies change (optional for local dev; useful for frozen installs):
+Run the app:
 
 ```bash
-uv lock
+uv run python -m app.main
 ```
 
-Shortcuts: `make sync`, `make lock` (see `Makefile`).
+## How to extend
 
-## Database migrations
+1. **Add an HTTP endpoint** — create a route in `src/app/api/routes.py` and publish via `rabbit_broker.publish`.
+2. **Add a consumer** — add `@rabbit_router.subscriber(...)` in `src/app/consumers/` and import the module in `main.py`.
+3. **Separate worker process** — for production you can split consumers into a standalone `faststream run` worker; see [docs/faststream_fastapi_integration.md](docs/faststream_fastapi_integration.md).
 
-With Postgres up and environment variables loaded:
+## Docker services
 
-```bash
-uv run alembic upgrade head
-```
+| Service   | Port  | Description              |
+|-----------|-------|--------------------------|
+| `rabbitmq`| 5672, 15672 | AMQP + management UI |
+| `app`     | 8000  | FastAPI application      |
 
-## How to start (local)
-
-RabbitMQ and Postgres must be reachable. You usually do **not** need `PYTHONPATH` after `uv sync` (workspace packages are installed in editable mode).
-
-| Role | Command |
-|------|--------|
-| User API (**8000**) | `uv run --package user-service python -m user_service.main` |
-| User worker | `uv run --package user-service faststream run user_service.application.faststream_app:app` |
-| Store API (**8001**) | `uv run --package store-service python -m store_service.main` |
-| Store worker | `uv run --package store-service faststream run store_service.application.faststream_app:app` |
-
-For end-to-end behaviour, start **both** APIs and **both** workers, plus the broker and database.
-
-## Docker
+## Makefile shortcuts
 
 ```bash
-make up
-# or: docker compose up --build
-```
-
-| Compose service | Notes |
-|-----------------|--------|
-| `postgres` | Host port **5433** → container 5432 |
-| `rabbitmq` | **5672** (AMQP), **15672** (management UI) |
-| `user-api` | **8000** (`/health` for health checks) |
-| `user-worker` | User FastStream app |
-| `store-api` | **8001** |
-| `store-worker` | Store FastStream app |
-
-`user-worker`, `store-api`, and `store-worker` are ordered after a healthy `user-api` / Rabbit where `docker-compose.yml` specifies it.
-
-Stop:
-
-```bash
-make down
-# or: docker compose down
+make sync   # uv sync
+make up     # docker compose up --build
+make down   # docker compose down
 ```

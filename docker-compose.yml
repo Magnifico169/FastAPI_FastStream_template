@@ -1,13 +1,4 @@
 services:
-  postgres:
-    image: postgres:18
-    restart: unless-stopped
-    env_file: .env
-    ports:
-      - "5433:5432"
-    volumes:
-      - pg-data:/var/lib/postgresql/
-
   rabbitmq:
     image: rabbitmq:4.1-management-alpine
     hostname: rabbitmq
@@ -25,85 +16,19 @@ services:
       retries: 5
       start_period: 60s
 
-  user-api:
+  app:
     build:
       context: .
-      dockerfile:
-        services/user_service/Dockerfile
+      dockerfile: Dockerfile
     env_file:
       .env
     ports:
       - "8000:8000"
     depends_on:
-      postgres:
-        condition:
-          service_started
       rabbitmq:
-        condition:
-          service_healthy
-    restart:
-      unless-stopped
-
-  user-worker:
-    build:
-      context: .
-      dockerfile:
-        services/user_service/Dockerfile-worker
-    env_file:
-      .env
-    depends_on:
-      user-api:
-        condition:
-          service_healthy
-      rabbitmq:
-        condition:
-          service_healthy
-    restart:
-      unless-stopped
-
-  store-api:
-    build:
-      context: .
-      dockerfile:
-        services/store_service/Dockerfile
-    env_file:
-      .env
-    ports:
-      - "8001:8001"
-    depends_on:
-      user-api:
-        condition:
-          service_healthy
-      postgres:
-        condition:
-          service_started
-      rabbitmq:
-        condition:
-          service_healthy
-    restart:
-      unless-stopped
-
-  store-worker:
-    build:
-      context: .
-      dockerfile:
-        services/store_service/Dockerfile-worker
-    env_file:
-      .env
-    depends_on:
-      user-api:
-        condition:
-          service_healthy
-      rabbitmq:
-        condition:
-          service_healthy
-    restart:
-      unless-stopped
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
-  pg-data:
-    name:
-      postgres-data
   rabbitmq-data:
-    name:
-      rabbit-data
+    name: rabbit-data

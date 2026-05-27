@@ -1,1 +1,0 @@
-"""FastStream consumers (product / inventory)."""

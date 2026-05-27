@@ -1,66 +1,46 @@
-FastStream can be seamlessly integrated with other frameworks and runtimes, providing a unified way to combine event-driven and request-driven architectures. In particular, it works well alongside frameworks like FastAPI, as well as task processing tools such as TaskIQ and similar async ecosystems.
+# FastAPI + FastStream integration
 
-Let’s start with a simple example of a small service where FastStream and FastAPI are used together, each managing its own lifecycle and dependency injection:
+This template uses **RabbitRouter** to run FastAPI and FastStream in a **single process** with shared dependency injection.
 
-```python
-from fastapi import FastAPI
-from faststream import FastStream
-from faststream.rabbit import RabbitBroker
-
-# FastStream part
-broker = RabbitBroker("amqp://guest:guest@localhost:5672/")
-stream_app = FastStream(broker)
-
-@broker.subscriber("orders")
-async def handle_order(msg: dict):
-    print(f"[BROKER] {msg}")
-
-# FastAPI part
-api_app = FastAPI()
-
-@api_app.get("/")
-async def root():
-    return {"status": "ok"}
-```
-
-In this setup, FastAPI and FastStream coexist but remain independent systems. Each has its own lifecycle, its own dependency injection mechanism, and its own entry point. While this works, it is not always convenient to maintain two separate DI systems — one for FastAPI and another for FastStream.
-
-To address this, FastStream provides tight integration with FastAPI, allowing you to reuse FastAPI’s dependency injection system and unify the application structure.
-
-Here’s how you can do it using `RabbitRouter`:
+## Pattern used in this repo
 
 ```python
-from fastapi import FastAPI, Depends
-from faststream.rabbit.fastapi import RabbitRouter
+# messaging.py
+rabbit_router = RabbitRouter(url=rabbitmq_uri)
+rabbit_broker = rabbit_router.broker
 
-router = RabbitRouter("amqp://guest:guest@localhost:5672/")
+# api/routes.py — HTTP publishes a message
+await rabbit_broker.publish(message, queue=messages_queue, exchange=messages_exchange)
 
-app = FastAPI()
-app.include_router(router)
+# consumers/handler.py — subscriber processes it
+@rabbit_router.subscriber(queue=messages_queue, exchange=messages_exchange)
+async def handle_message(message: MessageCreate) -> None:
+    logger.info("Received message: %s", message.text)
 
-# access broker via router
-broker = router.broker
+# main.py — single entry point
+app.include_router(api_router)
+app.include_router(rabbit_router)
 
-# shared dependency
-def get_user():
-    return {"name": "John"}
-
-# FastAPI route
-@app.get("/")
-async def root(user=Depends(get_user)):
-    return {"user": user}
-
-# FastStream subscriber using FastAPI DI
-@router.subscriber("orders")
-async def handle_order(msg: dict, user=Depends(get_user)):
-    print(f"[BROKER] {msg}, user={user}")
+@asynccontextmanager
+async def lifespan(app):
+    await rabbit_broker.start()
+    yield
+    await rabbit_broker.stop()
 ```
 
-In this approach:
+Key points:
 
-* `RabbitRouter` integrates directly into the FastAPI application via `include_router`.
-* The broker is available as `router.broker`.
-* FastStream handlers can use FastAPI’s dependency injection (`Depends`).
-* There is a single lifecycle and a single DI container shared across both HTTP and message-based handlers.
+- `RabbitRouter` is included in FastAPI via `app.include_router(rabbit_router)`.
+- The broker is started/stopped in FastAPI lifespan.
+- HTTP handlers and subscribers share the same broker and can use FastAPI `Depends()`.
 
-This results in a cleaner architecture where FastAPI becomes the central entry point, and FastStream naturally extends it with event-driven capabilities.
+## Alternative: separate worker process
+
+For heavier workloads you can split HTTP and consumers into two processes:
+
+1. **API process** — FastAPI publishes messages (as in this template).
+2. **Worker process** — `faststream run app.faststream_app:app` runs only subscribers.
+
+That adds a second entry point and manual queue/exchange declaration on worker startup, but scales consumers independently from HTTP.
+
+See the [FastStream docs](https://faststream.ag2.ai/latest/integrations/fastapi/) for details.
