@@ -1,11 +1,11 @@
 # FastStream Template
 
-Minimal **FastAPI + FastStream (RabbitMQ)** example in a single process. An HTTP endpoint accepts JSON, publishes a message to RabbitMQ, and a FastStream subscriber processes it.
+**FastAPI + FastStream (RabbitMQ) + Postgres** in a single process. An HTTP endpoint accepts JSON, publishes a domain message to RabbitMQ, and a FastStream subscriber persists it via `MessageService`.
 
 ## Flow
 
 ```text
-POST /messages  →  rabbit_broker.publish  →  RabbitMQ  →  @rabbit_router.subscriber
+POST /messages  →  MessageService.enqueue  →  RabbitMQ  →  message_handler  →  Postgres
 ```
 
 ## Project structure
@@ -15,21 +15,26 @@ FastStreamTemplate/
 ├── pyproject.toml
 ├── docker-compose.yml
 ├── Dockerfile
+├── alembic/
 ├── .env.example
 └── src/app/
-    ├── main.py           # FastAPI app, broker lifecycle
-    ├── messaging.py      # RabbitRouter, exchange, queue
-    ├── settings.py       # RabbitMQ config
-    ├── schemas.py        # Request/response models
-    ├── api/routes.py     # POST /messages
-    └── consumers/handler.py  # Message subscriber
+    ├── main.py                              # create_app(), lifespan
+    ├── api/v1/messages.py                   # POST /messages
+    ├── api/exception_handlers.py
+    ├── consumers/message_handler.py         # RabbitMQ subscriber
+    ├── services/message_service.py
+    ├── domain/                                # models, DTOs, enums, exceptions
+    └── infrastructure/
+        ├── messaging/rabbit.py              # RabbitRouter, broker
+        ├── settings/                          # RabbitMQ, Postgres
+        └── persistence/                       # ORM, repository, session
 ```
 
 ## Requirements
 
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/)
-- RabbitMQ (local or via Docker)
+- RabbitMQ and Postgres (local or via Docker)
 
 ## Quick start
 
@@ -45,7 +50,7 @@ FastStreamTemplate/
    uv sync
    ```
 
-3. Start RabbitMQ and the app:
+3. Start Postgres, RabbitMQ, and the app:
 
    ```bash
    docker compose up --build
@@ -61,19 +66,21 @@ FastStreamTemplate/
 
    Expected response: `202 Accepted` with `{"status":"processing"}`.
 
-   Check app logs for: `Received message: hello`.
+   Check app logs for: `Message processed and saved: id=... text=hello`.
 
 ## Run locally (without Docker for the app)
 
-Start RabbitMQ (e.g. via `docker compose up rabbitmq -d`), then set in `.env`:
+Start infrastructure (e.g. `docker compose up rabbitmq postgres -d`), then set in `.env`:
 
 ```text
 RABBITMQ_HOST=localhost
+POSTGRES_HOST=localhost
 ```
 
-Run the app:
+Run migrations and the app:
 
 ```bash
+uv run alembic upgrade head
 uv run --env PYTHONPATH=src python -m app.main
 ```
 
@@ -85,16 +92,17 @@ make run
 
 ## How to extend
 
-1. **Add an HTTP endpoint** — create a route in `src/app/api/routes.py` and publish via `rabbit_broker.publish`.
+1. **Add an HTTP endpoint** — add a route under `src/app/api/v1/` and use `MessageService` or `rabbit_broker.publish` from `infrastructure.messaging.rabbit`.
 2. **Add a consumer** — add `@rabbit_router.subscriber(...)` in `src/app/consumers/` and import the module in `main.py`.
-3. **Separate worker process** — for production you can split consumers into a standalone `faststream run` worker; see [docs/faststream_fastapi_integration.md](docs/faststream_fastapi_integration.md).
+3. **Separate worker process** — split consumers into a standalone `faststream run` worker; see [docs/faststream_fastapi_integration.md](docs/faststream_fastapi_integration.md).
 
 ## Docker services
 
-| Service   | Port  | Description              |
-|-----------|-------|--------------------------|
-| `rabbitmq`| 5672, 15672 | AMQP + management UI |
-| `app`     | 8000  | FastAPI application      |
+| Service    | Port        | Description              |
+|------------|-------------|--------------------------|
+| `rabbitmq` | 5672, 15672 | AMQP + management UI     |
+| `postgres` | 5432        | Message persistence      |
+| `app`      | 8000        | FastAPI application      |
 
 ## Makefile shortcuts
 
